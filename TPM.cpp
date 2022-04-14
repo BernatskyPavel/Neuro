@@ -1,9 +1,10 @@
 #include "TPM.hpp"
+#include <cstring>
 
 TPM::TPM()
 {
   this->config = ITPMConfig();
-  u_int32_t K = this->config.K();
+  int K = this->config.K();
 
   this->Perceptrons = new Perceptron[K];
   IPerceptronConfig pConfig = config.ConvertToPConfig();
@@ -15,7 +16,7 @@ TPM::TPM()
 TPM::TPM(ITPMConfig config)
 {
   this->config = config;
-  u_int32_t K = this->config.K();
+  int K = this->config.K();
 
   this->Perceptrons = new Perceptron[K];
   IPerceptronConfig pConfig = config.ConvertToPConfig();
@@ -24,19 +25,39 @@ TPM::TPM(ITPMConfig config)
   }
 }
 
+TPM::TPM(TPM const& rhs)
+{
+  this->config = rhs.config;
+  this->Output = rhs.Output;
+  this->Perceptrons = new Perceptron[this->config.K()];
+  memcpy(
+    this->Perceptrons, rhs.Perceptrons, this->config.K() * sizeof(Perceptron));
+}
+
 TPM::~TPM()
 {
   delete[] this->Perceptrons;
 }
 
-int32_t
+TPM&
+TPM::operator=(TPM const& rhs)
+{
+  this->config = rhs.config;
+  this->Output = rhs.Output;
+  this->Perceptrons = new Perceptron[this->config.K()];
+  memcpy(
+    this->Perceptrons, rhs.Perceptrons, this->config.K() * sizeof(Perceptron));
+  return *this;
+}
+
+int
 TPM::GetOutput(int** AInputs, size_t x, size_t y)
 {
   if (x != this->config.K() || y != this->config.N()) {
     return -1;
   }
 
-  this->Output = 0;
+  this->Output = 1;
   for (size_t i = 0; i < this->config.K(); i++) {
     this->Output *= this->Perceptrons[i].GetOutput(AInputs[i]);
   }
@@ -44,14 +65,16 @@ TPM::GetOutput(int** AInputs, size_t x, size_t y)
 }
 
 void
-TPM::Synchronize()
+TPM::Synchronize(int OutputTPM)
 {
-  for (size_t i = 0; i < this->config.K(); i++) {
-    this->Perceptrons[i].AktualizeWieghts(this->Output);
+  if (this->Output == OutputTPM) {
+    for (size_t i = 0; i < this->config.K(); i++) {
+      this->Perceptrons[i].AktualizeWieghts(this->Output);
+    }
   }
 }
 
-int32_t
+int
 TPM::Distance(const TPM& ATPM)
 {
   int Result = 0;
@@ -67,10 +90,10 @@ TPM::GetConfig()
   return this->config;
 }
 
-int32_t**
+int**
 TPM::GetWeightMatrix()
 {
-  int32_t** matrix = new int32_t*[this->config.K()];
+  int** matrix = new int*[this->config.K()];
   for (size_t i = 0; i < this->config.K(); i++) {
     matrix[i] = this->Perceptrons[i].GetWeights();
   }

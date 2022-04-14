@@ -6,16 +6,18 @@ class TPM
 {
   ITPMConfig config;
   Perceptron* Perceptrons;
-  int32_t Output;
+  int Output;
 
 public:
   TPM();
   TPM(ITPMConfig config);
+  TPM(TPM const& rhs);
   ~TPM();
+  TPM& operator=(TPM const& rhs);
   ITPMConfig GetConfig();
-  int32_t GetOutput(int32_t** AInputs, size_t x, size_t y);
-  void Synchronize();
-  int32_t Distance(const TPM& ATPM);
-  void ModifyOutput(int32_t AOutput) { Output = AOutput; }
-  int32_t** GetWeightMatrix();
+  int GetOutput(int** AInputs, size_t x, size_t y);
+  void Synchronize(int OutputTPM);
+  int Distance(const TPM& ATPM);
+  void ModifyOutput(int AOutput) { Output = AOutput; }
+  int** GetWeightMatrix();
 };

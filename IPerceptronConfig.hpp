@@ -5,17 +5,22 @@
 class IPerceptronConfig
 {
 private:
-  u_int32_t _N;
-  int32_t _L;
+  int _N;
+  int _L;
 
 public:
   IPerceptronConfig()
     : _N(16)
     , _L(3){};
-  IPerceptronConfig(u_int32_t n, int32_t l)
+  IPerceptronConfig(int n, int l)
     : _N(n)
     , _L(l){};
-  u_int32_t N() { return this->_N; };
-  int32_t L() { return this->_L; };
+  IPerceptronConfig(IPerceptronConfig const& rhs)
+  {
+    this->_L = rhs._L;
+    this->_N = rhs._N;
+  };
+  int N() { return this->_N; };
+  int L() { return this->_L; };
 };
 #endif

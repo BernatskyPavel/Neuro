@@ -1,4 +1,5 @@
 #include "Perceptron.hpp"
+#include <cstring>
 #include <random>
 //#pragma package(smart_init)
 
@@ -16,9 +17,31 @@ Perceptron::Perceptron(IPerceptronConfig config)
   RandomWeights();
 }
 
+Perceptron::Perceptron(Perceptron const& rhs)
+{
+  this->config = rhs.config;
+  this->Output = rhs.Output;
+  this->Weights = new int[this->config.N()];
+  this->Inputs = new int[this->config.N()];
+  memcpy(this->Weights, rhs.Weights, this->config.N() * sizeof(int));
+  memcpy(this->Inputs, rhs.Inputs, this->config.N() * sizeof(int));
+}
+
 Perceptron::~Perceptron()
 {
   delete[] this->Weights;
+}
+
+Perceptron&
+Perceptron::operator=(Perceptron const& rhs)
+{
+  this->config = rhs.config;
+  this->Output = rhs.Output;
+  this->Weights = new int[this->config.N()];
+  this->Inputs = new int[this->config.N()];
+  memcpy(this->Weights, rhs.Weights, this->config.N() * sizeof(int));
+  memcpy(this->Inputs, rhs.Inputs, this->config.N() * sizeof(int));
+  return *this;
 }
 
 int
@@ -29,7 +52,7 @@ Perceptron::GetOutput(int* AInputs)
   for (size_t i = 0; i < this->config.N(); i++) {
     this->Output += this->Inputs[i] * this->Weights[i];
   }
-  this->Output = this->Output >= 0 ? 1 : -1;
+  this->Output = this->Output > 0 ? 1 : -1;
   return this->Output;
 }
 
@@ -38,17 +61,18 @@ Perceptron::RandomWeights()
 {
   std::random_device dev;
   std::mt19937 rng(dev());
-  std::uniform_int_distribution dist(0, 2 * this->config.L());
+  int _L = this->config.L();
+  std::uniform_int_distribution<int> dist(-_L, _L);
 
   for (size_t i = 0; i < this->config.N(); i++) {
-    this->Weights[i] = this->config.L() - dist(rng);
+    this->Weights[i] = dist(rng);
   }
 }
 
 void
 Perceptron::AktualizeWieghts(int OutputTPM)
 {
-  int32_t _L = this->config.L();
+  int _L = this->config.L();
   if (this->Output == OutputTPM) {
     for (size_t i = 0; i < this->config.N(); i++) {
       this->Weights[i] += this->Output * this->Inputs[i];
@@ -71,7 +95,7 @@ Perceptron::Distance(const Perceptron& P)
   return Result;
 }
 
-int32_t*
+int*
 Perceptron::GetWeights()
 {
   return this->Weights;
