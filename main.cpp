@@ -46,31 +46,29 @@ main(int argc, char const* argv[])
 {
   int n, k, l, it;
   bool is_errors = false;
-  if (argc > 1) {
-    n = parse_argument(N_PARAM, argc, argv);
-    if (n == BAD_ARGUMENT) {
-      is_errors = true;
-    } else if (n == NOT_FOUND) {
-      n = N_DEFAULT;
-    }
-    k = parse_argument(K_PARAM, argc, argv);
-    if (k == BAD_ARGUMENT) {
-      is_errors = true;
-    } else if (k == NOT_FOUND) {
-      k = K_DEFAULT;
-    }
-    l = parse_argument(L_PARAM, argc, argv);
-    if (l == BAD_ARGUMENT) {
-      is_errors = true;
-    } else if (l == NOT_FOUND) {
-      l = L_DEFAULT;
-    }
-    it = parse_argument(ITERATIONS_PARAM, argc, argv);
-    if (it == BAD_ARGUMENT) {
-      is_errors = true;
-    } else if (it == NOT_FOUND) {
-      it = ITERATIONS_DEFAULT;
-    }
+  n = parse_argument(N_PARAM, argc, argv);
+  if (n == BAD_ARGUMENT) {
+    is_errors = true;
+  } else if (n == NOT_FOUND) {
+    n = N_DEFAULT;
+  }
+  k = parse_argument(K_PARAM, argc, argv);
+  if (k == BAD_ARGUMENT) {
+    is_errors = true;
+  } else if (k == NOT_FOUND) {
+    k = K_DEFAULT;
+  }
+  l = parse_argument(L_PARAM, argc, argv);
+  if (l == BAD_ARGUMENT) {
+    is_errors = true;
+  } else if (l == NOT_FOUND) {
+    l = L_DEFAULT;
+  }
+  it = parse_argument(ITERATIONS_PARAM, argc, argv);
+  if (it == BAD_ARGUMENT) {
+    is_errors = true;
+  } else if (it == NOT_FOUND) {
+    it = ITERATIONS_DEFAULT;
   }
 
   if (is_errors) {
