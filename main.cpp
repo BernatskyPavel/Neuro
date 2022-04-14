@@ -1,25 +1,94 @@
 #include "TPM.hpp"
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <random>
+#include <string>
 #include <wchar.h>
+
+#define N_PARAM "-n:"
+#define N_DEFAULT 16
+#define K_PARAM "-k:"
+#define K_DEFAULT 3
+#define L_PARAM "-l:"
+#define L_DEFAULT 3
+#define ITERATIONS_PARAM "-it:"
+#define ITERATIONS_DEFAULT 100
+
+#define NOT_FOUND -2
+#define BAD_ARGUMENT -1
+
+int
+parse_argument(const char* name, int argc, char const* argv[])
+{
+  for (int i = 1; i < argc; i++) {
+    const char* ptr = strstr(argv[i], name);
+    if (ptr != NULL) {
+      // atoi(ptr + strlen(name));
+      std::string str(ptr + strlen(name));
+      try {
+        return std::stoi(str);
+      } catch (std::invalid_argument const& e) {
+        std::cerr << e.what() << ": Invalid argument " << name << "\n";
+      } catch (std::out_of_range const& e) {
+        std::cerr << e.what() << ": Out of range value of argument " << name
+                  << "\n";
+      }
+      return BAD_ARGUMENT;
+    }
+  }
+  return NOT_FOUND;
+}
 
 int
 main(int argc, char const* argv[])
 {
+  int n, k, l, it;
+  bool is_errors = false;
+  if (argc > 1) {
+    n = parse_argument(N_PARAM, argc, argv);
+    if (n == BAD_ARGUMENT) {
+      is_errors = true;
+    } else if (n == NOT_FOUND) {
+      n = N_DEFAULT;
+    }
+    k = parse_argument(K_PARAM, argc, argv);
+    if (k == BAD_ARGUMENT) {
+      is_errors = true;
+    } else if (k == NOT_FOUND) {
+      k = K_DEFAULT;
+    }
+    l = parse_argument(L_PARAM, argc, argv);
+    if (l == BAD_ARGUMENT) {
+      is_errors = true;
+    } else if (l == NOT_FOUND) {
+      l = L_DEFAULT;
+    }
+    it = parse_argument(ITERATIONS_PARAM, argc, argv);
+    if (it == BAD_ARGUMENT) {
+      is_errors = true;
+    } else if (it == NOT_FOUND) {
+      it = ITERATIONS_DEFAULT;
+    }
+  }
+
+  if (is_errors) {
+    return -1;
+  }
+
   std::random_device dev;
   std::mt19937 rng(dev());
   std::uniform_int_distribution<int> dist(-1, 1);
 
-  ITPMConfig conf = ITPMConfig(3, 16, 3);
+  ITPMConfig conf = ITPMConfig(k, n, l);
 
   int step = 0;
   int O = 0, O2 = 0;
 
   std::map<int, int, std::less<int>> stats;
 
-  for (int it = 0; it < 100; it++) {
+  for (int t = 0; t < it; t++) {
     TPM tpm = TPM(conf), tpm2 = TPM(conf);
     ITPMConfig config = tpm.GetConfig();
     do {
